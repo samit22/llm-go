@@ -5,20 +5,20 @@ import (
 	"log/slog"
 	"os"
 	"strings"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNew(t *testing.T) {
-	t.Log("Initialize server")
-	ctx := context.Background()
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+func (rs *testRagSuite) New() {
+	rs.Run("Initializes clients", func() {
+		ctx := context.Background()
+		log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	srv, err := New(ctx, log, "testKey")
+		srv, err := New(ctx, log, "testKey")
 
-	assert.Nil(t, err)
-	assert.NotNil(t, srv)
+		assert.Nil(rs.T(), err)
+		assert.NotNil(rs.T(), srv)
+	})
 }
 
 func (rs *testRagSuite) TestAddDocuments() {

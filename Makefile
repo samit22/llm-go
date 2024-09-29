@@ -1,4 +1,4 @@
-GEMINI_FLASH_API_KEY?= $(shell cat ./.env.gemini-flash-api-key)
+GEMINI_FLASH_API_KEY?=$(shell cat ./.env.gemini-flash-api-key)
 
 start-docker:
 	docker build -t rag-server:latest .
@@ -23,4 +23,5 @@ build:
 short-test:
 	go test ./... -short
 test:
-	mkdir -p coverage && GEMINI_FLASH_API_KEY=${GEMINI_FLASH_API_KEY}  go test ./... --cover -coverprofile coverage/coverage.out
+	docker compose -f docker-compose-vector-db.yaml up -d
+	mkdir -p coverage && go test ./... --cover -coverprofile coverage/coverage.out
