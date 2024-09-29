@@ -1,0 +1,42 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  build-test-scan:
+    name: Build Test and Scan
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_BUILD_ID: ${{ github.run_id }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: make test
+
+    - name: Run coverage
+      run: ./test.sh
+    - name: Upload coverage to Codecov
+      run: bash <(curl -s https://codecov.io/bash)
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      with:
+        projectBaseDir: ./
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

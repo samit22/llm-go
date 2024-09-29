@@ -25,3 +25,4 @@ go.work.sum
 .env
 .env.gemini-flash-api-key
 server
+coverage/coverage.out

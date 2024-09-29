@@ -8,4 +8,6 @@ CGO_ENABLED=0 GOOS=linux go build -o service .
 
 EXPOSE 5000
 
-CMD ["GIN_MODE=release", "./service"]
+ENV GIN_MODE=release
+
+CMD ["./service"]
