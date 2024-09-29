@@ -14,7 +14,6 @@ import (
 func main() {
 	ctx := context.Background()
 	log := createLogger().With("log_type", "application")
-
 	geminiKey := os.Getenv("GEMINI_FLASH_API_KEY")
 	if geminiKey == "" {
 		log.Error("GEMINI_FLASH_API_KEY is not set")
@@ -27,18 +26,21 @@ func main() {
 		os.Exit(1)
 	}
 	defer rag.Close()
-	handler := handler{
+	handler := &handler{
 		log:       log,
 		ragServer: rag,
 	}
-
-	engine := gin.New()
-	engine.Use(handler.recover, handler.accessLog)
-
-	engine.POST("/add-documents", handler.addDocumentsHandler)
-	engine.POST("/ask", handler.askQuestion)
+	engine := setupHTTPServer(handler)
 	engine.Run(":" + cmp.Or(os.Getenv("RAG_PORT"), "5000"))
+}
 
+func setupHTTPServer(h *handler) *gin.Engine {
+	engine := gin.New()
+	engine.Use(h.recover, h.accessLog)
+	engine.POST("/add-documents", h.addDocumentsHandler)
+	engine.POST("/ask", h.askQuestion)
+	h.log.Info("Starting server on port 5000")
+	return engine
 }
 
 func createMessage(template string, args ...interface{}) string {

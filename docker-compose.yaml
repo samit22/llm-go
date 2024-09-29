@@ -5,14 +5,13 @@ services:
     image: ${RAG_SERVER_IMAGE}
     ports:
       - 5000:5000
-    depends_on:
-      - vector-db-weaviate-service
+    restart: on-failure
     environment:
       GEMINI_FLASH_API_KEY: ${GEMINI_FLASH_API_KEY}
-      WEAVIATE_DB_HOST: vector-db-weaviate-service:5555
+      WEAVIATE_DB_HOST: weaviate_db:5555
     networks:
       - rag-net
-  vector-db-weaviate-service:
+  weaviate_db:
     command:
       - --host
       - 0.0.0.0
