@@ -28,10 +28,9 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: make test
-
-    - name: Run coverage
-      run: ./test.sh
+      run: GEMINI_FLASH_API_KEY=${{ secrets.GEMINI_FLASH_API_KEY }} make test
+      env:
+        GEMINI_FLASH_API_KEY: ${{ secrets.GEMINI_FLASH_API_KEY }}
     - name: Upload results to Codecov
       uses: codecov/codecov-action@v4
       with:

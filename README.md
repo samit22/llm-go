@@ -19,10 +19,10 @@ Example of a rag server built using go.
 
 ##### Requirements
  - Docker to run vector DB locally
-    - Installation (guide)[https://docs.docker.com/engine/install]
+    - Installation [guide](https://docs.docker.com/engine/install
 
  - go 1.23
-    - Installation (guide)[https://go.dev/doc/install]
+    - Installation [guide](https://go.dev/doc/install)
 
  - API Key for Gemini
     - Follow this [link](https://aistudio.google.com/app/) to create a key

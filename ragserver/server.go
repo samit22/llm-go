@@ -23,7 +23,7 @@ const (
 	collectionClass    = "Document"
 )
 
-type ragServer struct {
+type server struct {
 	log             *slog.Logger
 	genClient       *genai.Client
 	vectorDBClient  *weaviate.Client
@@ -31,7 +31,7 @@ type ragServer struct {
 	embedModel      *genai.EmbeddingModel
 }
 
-func New(ctx context.Context, log *slog.Logger, apiKey string) (*ragServer, error) {
+func New(ctx context.Context, log *slog.Logger, apiKey string) (*server, error) {
 	genClient, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return nil, fmt.Errorf("create genai client %w", err)
@@ -48,7 +48,7 @@ func New(ctx context.Context, log *slog.Logger, apiKey string) (*ragServer, erro
 		return nil, fmt.Errorf("check weaviate collection: %w", err)
 	}
 
-	return &ragServer{
+	return &server{
 		log:             log,
 		vectorDBClient:  weavClient,
 		genClient:       genClient,
@@ -58,12 +58,12 @@ func New(ctx context.Context, log *slog.Logger, apiKey string) (*ragServer, erro
 }
 
 // Close disconnects clients that requires closing
-func (rag *ragServer) Close() {
+func (rag *server) Close() {
 	rag.genClient.Close()
 }
 
 // AddDocuments adds new document to the knowledge base
-func (rag *ragServer) AddDocuments(ctx context.Context, documents []string) error {
+func (rag *server) AddDocuments(ctx context.Context, documents []string) error {
 	batch := rag.embedModel.NewBatch()
 	for _, doc := range documents {
 		batch.AddContent(genai.Text(doc))
@@ -98,7 +98,7 @@ func (rag *ragServer) AddDocuments(ctx context.Context, documents []string) erro
 }
 
 // Ask question to send the query
-func (rag *ragServer) AskQuestion(ctx context.Context, question string) (string, error) {
+func (rag *server) AskQuestion(ctx context.Context, question string) (string, error) {
 	embedModelResp, err := rag.embedModel.EmbedContent(ctx, genai.Text(question))
 	if err != nil {
 		return "", fmt.Errorf("embedding question: %w", err)
