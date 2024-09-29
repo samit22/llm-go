@@ -23,3 +23,7 @@ build:
 	@echo "Building the Go program"
 	go mod download
 	go build -o server .
+
+.PHONY: test
+test:
+	mkdir -p coverage && go test ./... --cover -coverprofile coverage/coverage.out

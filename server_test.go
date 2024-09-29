@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -106,7 +108,7 @@ func Test_Handler(t *testing.T) {
 	}
 	t.Log("Recover middleware")
 	{
-		t.Run("Does not crash the program", func(t *testing.T) {
+		t.Run("Does not crash the program for panics", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			ginCtx, engine := gin.CreateTestContext(w)
 
@@ -129,6 +131,69 @@ func Test_Handler(t *testing.T) {
 
 			engine.ServeHTTP(w, ginCtx.Request)
 		})
+	}
+	t.Log("Access log middleware")
+	{
+		var lasLog = func(rawData string) map[string]interface{} {
+			var data map[string]interface{}
+			strSplit := strings.Split(rawData, "/n")
+			if len(strSplit) == 0 {
+				return data
+			}
+
+			lastLog := strSplit[len(strSplit)-1]
+			json.Unmarshal([]byte(lastLog), &data)
+			return data
+		}
+
+		type testData struct {
+			name       string
+			respStatus int
+
+			expectedLevel string
+		}
+		var tests = []testData{
+			{
+				name:          "500 status are recorded as error",
+				respStatus:    500,
+				expectedLevel: "ERROR",
+			},
+			{
+				name:          "non 500 status are recorded as info",
+				respStatus:    200,
+				expectedLevel: "INFO",
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				w := httptest.NewRecorder()
+				ginCtx, engine := gin.CreateTestContext(w)
+				var buf bytes.Buffer
+				log := slog.New(slog.NewJSONHandler(&buf, nil))
+
+				h := handler{
+					log: log,
+				}
+
+				engine.Use(h.accessLog)
+				engine.GET("/app", func(ctx *gin.Context) {
+					ctx.JSON(tt.respStatus, gin.H{"message": "some message"})
+				})
+
+				ginCtx.Request = &http.Request{
+					Method: http.MethodGet,
+					Header: make(http.Header),
+					URL: &url.URL{
+						Path: "/app",
+					},
+				}
+				engine.ServeHTTP(w, ginCtx.Request)
+
+				data := lasLog(buf.String())
+				assert.Equal(t, tt.expectedLevel, data["level"])
+
+			})
+		}
 	}
 }
 

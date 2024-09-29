@@ -13,8 +13,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	jsonHandler := slog.NewJSONHandler(os.Stderr, nil)
-	log := slog.New(jsonHandler)
+	log := createLogger().With("log_type", "application")
 
 	geminiKey := os.Getenv("GEMINI_FLASH_API_KEY")
 	if geminiKey == "" {
@@ -34,7 +33,7 @@ func main() {
 	}
 
 	engine := gin.New()
-	engine.Use(handler.recover)
+	engine.Use(handler.recover, handler.accessLog)
 
 	engine.POST("/add-documents", handler.addDocumentsHandler)
 	engine.POST("/ask", handler.askQuestion)
@@ -44,4 +43,10 @@ func main() {
 
 func createMessage(template string, args ...interface{}) string {
 	return fmt.Sprintf(template, args...)
+}
+
+func createLogger() *slog.Logger {
+	jsonHandler := slog.NewJSONHandler(os.Stderr, nil)
+	log := slog.New(jsonHandler)
+	return log
 }
