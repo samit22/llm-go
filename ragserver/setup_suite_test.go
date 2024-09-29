@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/generative-ai-go/genai"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
 	"google.golang.org/api/option"
@@ -29,13 +30,13 @@ func (rs *testRagSuite) SetupSuite() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	genClient, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_FLASH_API_KEY")))
-	rs.Require().Nil(err)
+	assert.Nil(rs.T(), err)
 
 	vectorDBClient, err := weaviate.NewClient(weaviate.Config{
 		Host:   "localhost:5555",
 		Scheme: "http",
 	})
-	rs.Require().Nil(err)
+	assert.Nil(rs.T(), err)
 	rs.rag = &server{
 		log:             log,
 		genClient:       genClient,
