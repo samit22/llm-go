@@ -31,9 +31,6 @@ jobs:
       run: GEMINI_FLASH_API_KEY=${{ secrets.GEMINI_FLASH_API_KEY }} make test
       env:
         GEMINI_FLASH_API_KEY: ${{ secrets.GEMINI_FLASH_API_KEY }}
-
-    - name: Run coverage
-      run: ./test.sh
     - name: Upload results to Codecov
       uses: codecov/codecov-action@v4
       with:

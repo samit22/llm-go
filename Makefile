@@ -24,4 +24,4 @@ short-test:
 	go test ./... -short
 test:
 	docker compose -f docker-compose-vector-db.yaml up -d
-	mkdir -p coverage && go test ./... --cover -coverprofile coverage/coverage.out
+	go test -race ./... -coverprofile=coverage.txt -covermode=atomic
