@@ -14,7 +14,7 @@ func (rs *testRagSuite) New() {
 		ctx := context.Background()
 		log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-		srv, err := New(ctx, log, "testKey")
+		srv, err := New(ctx, log, os.Getenv("GEMINI_FLASH_API_KEY"))
 
 		assert.Nil(rs.T(), err)
 		assert.NotNil(rs.T(), srv)
