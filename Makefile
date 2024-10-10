@@ -1,4 +1,5 @@
 GEMINI_FLASH_API_KEY?=$(shell cat ./.env.gemini-flash-api-key)
+RAG_CLIENT?=langchain
 
 start-docker:
 	docker build -t rag-server:latest .
@@ -12,7 +13,7 @@ start-vector-db:
 
 run: build
 	@echo "Running Rag Server"
-	GEMINI_FLASH_API_KEY=$(GEMINI_FLASH_API_KEY) ./server
+	GEMINI_FLASH_API_KEY=$(GEMINI_FLASH_API_KEY) RAG_CLIENT=$(RAG_CLIENT) ./server
 
 .PHONY: build
 build:

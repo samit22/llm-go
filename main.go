@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"llm-rag/ragserver"
+	"llm-rag/ragserver/langchain"
 	"log/slog"
 	"os"
 
@@ -19,19 +20,37 @@ func main() {
 		log.Error("GEMINI_FLASH_API_KEY is not set")
 		os.Exit(1)
 	}
-
-	rag, err := ragserver.New(ctx, log, geminiKey)
+	handler, err := createHandler(ctx, log, geminiKey)
 	if err != nil {
 		log.Error(createMessage("failed to initialize RAG server: %v", err))
 		os.Exit(1)
 	}
-	defer rag.Close()
-	handler := &handler{
-		log:       log,
-		ragServer: rag,
-	}
+	defer handler.ragServer.Close()
 	engine := setupHTTPServer(handler)
 	engine.Run(":" + cmp.Or(os.Getenv("RAG_PORT"), "5000"))
+}
+
+func createHandler(ctx context.Context, log *slog.Logger, geminiKey string) (*handler, error) {
+	var (
+		rag RagServer
+		err error
+	)
+	switch os.Getenv("RAG_CLIENT") {
+	case langchainSDK:
+		log.Info("Using langchain SDK")
+		rag, err = langchain.New(ctx, log, geminiKey)
+	default:
+		log.Info("Using raw SDK")
+		rag, err = ragserver.New(ctx, log, geminiKey)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &handler{
+		log:       log,
+		ragServer: rag,
+	}, err
 }
 
 func setupHTTPServer(h *handler) *gin.Engine {

@@ -1,6 +1,7 @@
 package ragserver
 
 import (
+	"cmp"
 	"context"
 	"log/slog"
 	"os"
@@ -33,7 +34,7 @@ func (rs *testRagSuite) SetupSuite() {
 	assert.Nil(rs.T(), err)
 
 	vectorDBClient, err := weaviate.NewClient(weaviate.Config{
-		Host:   "localhost:5555",
+		Host:   cmp.Or(os.Getenv("WEAVIATE_DB_HOST"), "localhost:5555"),
 		Scheme: "http",
 	})
 	assert.Nil(rs.T(), err)
@@ -44,14 +45,9 @@ func (rs *testRagSuite) SetupSuite() {
 		generativeModel: genClient.GenerativeModel("gemini-1.5-flash"),
 		embedModel:      genClient.EmbeddingModel("text-embedding-004"),
 	}
+	checkWeaviateCollection(ctx, vectorDBClient, collectionClass)
 }
 
 func (rs *testRagSuite) TearDownSuite() {
 	rs.rag.genClient.Close()
-}
-
-func (rs *testRagSuite) SetupSubTest() {
-	ctx := context.Background()
-	err := checkWeaviateCollection(ctx, rs.rag.vectorDBClient, collectionClass)
-	rs.Assert().Nil(err)
 }

@@ -5,6 +5,11 @@ import (
 	"log/slog"
 )
 
+const (
+	rawSDK       = "raw"
+	langchainSDK = "langchain"
+)
+
 type RagServer interface {
 	AddDocuments(ctx context.Context, documents []string) error
 	AskQuestion(ctx context.Context, question string) (string, error)

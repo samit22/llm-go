@@ -128,7 +128,7 @@ func (rag *server) AskQuestion(ctx context.Context, question string) (string, er
 		return "", fmt.Errorf("decoding weaviate results: %w", err)
 	}
 
-	ragQuery := fmt.Sprintf(template, question, strings.Join(vectorContexts, "\n"))
+	ragQuery := fmt.Sprintf(Template, question, strings.Join(vectorContexts, "\n"))
 	llmResp, err := rag.generativeModel.GenerateContent(ctx, genai.Text(ragQuery))
 	if err != nil {
 		return "", fmt.Errorf("generating response from LLM: %w", err)
@@ -166,22 +166,6 @@ func extractGraphResult(result *models.GraphQLResponse) ([]string, error) {
 	}
 	return out, nil
 }
-
-const template = `
-### Question:
-%s
-
-### Context:
-%s
-### Instructions:
-- Provide a clear and concise response based on the context provided.
-- Stay focused on the context and avoid making assumptions beyond the given data.
-- Use the context to guide your response and provide a well-reasoned answer.
-- Ensure that your response is relevant and addresses the question asked.
-- If the question does not relate to the context, answer it as normal.
-
-### Expected Answer Format (Optional):
-[Specify any preferred format, such as bullet points, paragraphs, or specific instructions if needed.]`
 
 func checkWeaviateCollection(ctx context.Context, client *weaviate.Client, collClass string) error {
 	coll := &models.Class{
