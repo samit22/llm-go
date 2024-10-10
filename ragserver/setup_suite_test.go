@@ -1,6 +1,7 @@
 package ragserver
 
 import (
+	"cmp"
 	"context"
 	"log/slog"
 	"os"
@@ -33,7 +34,7 @@ func (rs *testRagSuite) SetupSuite() {
 	assert.Nil(rs.T(), err)
 
 	vectorDBClient, err := weaviate.NewClient(weaviate.Config{
-		Host:   "localhost:5555",
+		Host:   cmp.Or(os.Getenv("WEAVIATE_DB_HOST"), "localhost:5555"),
 		Scheme: "http",
 	})
 	assert.Nil(rs.T(), err)
