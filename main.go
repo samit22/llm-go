@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"llm-rag/ragserver"
-	"llm-rag/ragserver/langchan"
+	"llm-rag/ragserver/langchain"
 	"log/slog"
 	"os"
 
@@ -29,9 +29,9 @@ func main() {
 		err error
 	)
 	switch os.Getenv("RAG_CLIENT") {
-	case langchanSDK:
-		log.Info("Using langchan SDK")
-		rag, err = langchan.New(ctx, log, geminiKey)
+	case langchainSDK:
+		log.Info("Using langchain SDK")
+		rag, err = langchain.New(ctx, log, geminiKey)
 	default:
 		log.Info("Using raw SDK")
 		rag, err = ragserver.New(ctx, log, geminiKey)

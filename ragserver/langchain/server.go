@@ -1,4 +1,4 @@
-package langchan
+package langchain
 
 import (
 	"cmp"
