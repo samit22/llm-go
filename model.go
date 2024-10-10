@@ -7,7 +7,7 @@ import (
 
 const (
 	rawSDK       = "raw"
-	langchainSDK = "langchan"
+	langchainSDK = "langchain"
 )
 
 type RagServer interface {
