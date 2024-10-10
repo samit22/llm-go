@@ -45,14 +45,10 @@ func (rs *testRagSuite) SetupSuite() {
 		generativeModel: genClient.GenerativeModel("gemini-1.5-flash"),
 		embedModel:      genClient.EmbeddingModel("text-embedding-004"),
 	}
+	err = checkWeaviateCollection(ctx, vectorDBClient, collectionClass)
+	assert.Nil(rs.T(), err)
 }
 
 func (rs *testRagSuite) TearDownSuite() {
 	rs.rag.genClient.Close()
-}
-
-func (rs *testRagSuite) SetupSubTest() {
-	ctx := context.Background()
-	err := checkWeaviateCollection(ctx, rs.rag.vectorDBClient, collectionClass)
-	rs.Assert().Nil(err)
 }

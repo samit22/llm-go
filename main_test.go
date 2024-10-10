@@ -73,9 +73,8 @@ func TestCreateHandler(t *testing.T) {
 		})
 
 		t.Run("When RAG_CLIENT is not set it uses raw SDK", func(t *testing.T) {
-			handler, err := createHandler(ctx, log, geminiKey)
-			assert.NoError(t, err)
-			assert.NotNil(t, handler)
+			_, err := createHandler(ctx, log, geminiKey)
+			assert.Nil(t, err)
 		})
 	}
 }

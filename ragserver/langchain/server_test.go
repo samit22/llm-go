@@ -52,7 +52,6 @@ func (rs *testRagSuite) SetupSuite() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	ragServer, err := New(ctx, log, os.Getenv("GEMINI_FLASH_API_KEY"))
-	assert.Nil(rs.T(), err)
 
 	assert.Nil(rs.T(), err)
 	rs.rag = ragServer
