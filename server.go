@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,7 @@ func (h *handler) askQuestion(ctx *gin.Context) {
 func (h *handler) recover(ctx *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
-			h.log.Error(createMessage("Panic recovered %v", r))
+			h.log.Error(createMessage("Panic recovered message: %v", r), "stacktrace", string(debug.Stack()))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 	}()

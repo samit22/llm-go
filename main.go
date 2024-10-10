@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"llm-rag/ragserver"
+	"llm-rag/ragserver/langchan"
 	"log/slog"
 	"os"
 
@@ -20,16 +21,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	rag, err := ragserver.New(ctx, log, geminiKey)
+	handler := &handler{
+		log: log,
+	}
+	var (
+		rag RagServer
+		err error
+	)
+	switch os.Getenv("RAG_CLIENT") {
+	case langchanSDK:
+		log.Info("Using langchan SDK")
+		rag, err = langchan.New(ctx, log, geminiKey)
+	default:
+		log.Info("Using raw SDK")
+		rag, err = ragserver.New(ctx, log, geminiKey)
+	}
 	if err != nil {
 		log.Error(createMessage("failed to initialize RAG server: %v", err))
 		os.Exit(1)
 	}
 	defer rag.Close()
-	handler := &handler{
-		log:       log,
-		ragServer: rag,
-	}
+	handler.ragServer = rag
 	engine := setupHTTPServer(handler)
 	engine.Run(":" + cmp.Or(os.Getenv("RAG_PORT"), "5000"))
 }
