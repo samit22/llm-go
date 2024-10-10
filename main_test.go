@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -53,5 +54,28 @@ func TestSetupHTTPServer(t *testing.T) {
 		req, _ = http.NewRequest("POST", "/ask", bytes.NewBuffer([]byte(`{"question": "What is the meaning of life?"}`)))
 		engine.ServeHTTP(w, req)
 		assert.Equal(t, 500, w.Code)
+	}
+}
+
+func TestCreateHandler(t *testing.T) {
+	t.Log("Test createHandler")
+	{
+		ctx := context.Background()
+		log := createLogger().With("log_type", "application")
+		geminiKey := "test-api-key"
+
+		t.Run("When RAG_CLIENT is set to langchain, it uses langchain SDK", func(t *testing.T) {
+			t.Setenv("RAG_CLIENT", langchainSDK)
+			handler, err := createHandler(ctx, log, geminiKey)
+			assert.NoError(t, err)
+			assert.NotNil(t, handler)
+
+		})
+
+		t.Run("When RAG_CLIENT is not set it uses raw SDK", func(t *testing.T) {
+			handler, err := createHandler(ctx, log, geminiKey)
+			assert.NoError(t, err)
+			assert.NotNil(t, handler)
+		})
 	}
 }

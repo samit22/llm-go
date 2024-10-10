@@ -20,10 +20,17 @@ func main() {
 		log.Error("GEMINI_FLASH_API_KEY is not set")
 		os.Exit(1)
 	}
-
-	handler := &handler{
-		log: log,
+	handler, err := createHandler(ctx, log, geminiKey)
+	if err != nil {
+		log.Error(createMessage("failed to initialize RAG server: %v", err))
+		os.Exit(1)
 	}
+	defer handler.ragServer.Close()
+	engine := setupHTTPServer(handler)
+	engine.Run(":" + cmp.Or(os.Getenv("RAG_PORT"), "5000"))
+}
+
+func createHandler(ctx context.Context, log *slog.Logger, geminiKey string) (*handler, error) {
 	var (
 		rag RagServer
 		err error
@@ -37,13 +44,13 @@ func main() {
 		rag, err = ragserver.New(ctx, log, geminiKey)
 	}
 	if err != nil {
-		log.Error(createMessage("failed to initialize RAG server: %v", err))
-		os.Exit(1)
+		return nil, err
 	}
-	defer rag.Close()
-	handler.ragServer = rag
-	engine := setupHTTPServer(handler)
-	engine.Run(":" + cmp.Or(os.Getenv("RAG_PORT"), "5000"))
+
+	return &handler{
+		log:       log,
+		ragServer: rag,
+	}, err
 }
 
 func setupHTTPServer(h *handler) *gin.Engine {
